@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Telegram Mini App - Monetag</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src='//libtl.com/sdk.js' data-zone='9797292' data-sdk='show_9797292'></script>
+  <style>
+    body { font-family: Arial; text-align:center; margin-top:40px; background:#f5f5f5; }
+    button { padding:12px 20px; font-size:16px; background:#0088cc; color:white; border:none; border-radius:8px; cursor:pointer; }
+    button:hover { background:#0077b5; }
+    #status, #balance { margin-top:20px; font-size:18px; }
+  </style>
+</head>
+<body>
+  <h2>🎯 Earn Rewards by Watching Ads</h2>
+  <button onclick="showAd()">🎥 Watch Ad</button>
+  <p id="status">Ads Watched: 0</p>
+  <p id="balance">Balance: 0 Tk</p>
+
+  <script>
+    let adsWatched = 0;
+    const tg = window.Telegram.WebApp;
+
+    function showAd() {
+      if (typeof Monetag !== "undefined" && Monetag.show_9797292) {
+        Monetag.show_9797292({
+          onComplete: () => {
+            adsWatched++;
+            document.getElementById("status").innerText = "Ads Watched: " + adsWatched;
+
+            fetch("https://your-backend.onrender.com/api/addView", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ telegram_id: tg.initDataUnsafe.user.id })
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                document.getElementById("balance").innerText =
+                  "Balance: " + data.data.balance + " Tk";
+              }
+            })
+            .catch(err => console.error("Error:", err));
+          }
+        });
+      } else {
+        alert("Ad not loaded yet. Please try again!");
+      }
+    }
+  </script>
+</body>
+</html>
